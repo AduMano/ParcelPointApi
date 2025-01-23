@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <Folder Include="Data\Context\" />
+    <Folder Include="Middlewares\" />
     <Folder Include="Models\" />
     <Folder Include="Filters\" />
   </ItemGroup>

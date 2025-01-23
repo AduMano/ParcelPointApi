@@ -17,6 +17,7 @@ builder.Services.AddDbContext<ParcelPointDbContext>();
 
 // Automatically register all services
 builder.Services.RegisterServices();
+builder.Services.AddScoped<PasswordHelper>();
 
 // Cors
 builder.Services.AddCors(options =>
@@ -30,6 +31,7 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+Console.WriteLine(new PasswordHelper().HashPassword("asdasdasd"));
 
 // Allow Cors
 app.UseCors("AllowAnyOrigin");

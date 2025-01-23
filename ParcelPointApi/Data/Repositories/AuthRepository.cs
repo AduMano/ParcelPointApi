@@ -12,50 +12,52 @@ namespace ParcelPointDB.Data.Repositories
     public class AuthRepository : IAuthRepository
     {
         private readonly ParcelPointDbContext _context;
+        private readonly PasswordHelper _passwordHelper;
 
-        public AuthRepository(ParcelPointDbContext context)
+        public AuthRepository(ParcelPointDbContext context, PasswordHelper passwordHelper)
         {
             _context = context;
+            _passwordHelper = passwordHelper;
         }
 
         public async Task<IUserDto?> LoginAdmin(string username, string password)
         {
-            return await _context.Users
-                .Where(user =>
-                    user.Username == username &&
-                    user.Password == password &&
-                    user.Role.Name == "Admin"
-                )
-                .Select(user => new UserDto
-                {
-                    Id = user.Id,
-                    Username = user.Username,
-                    CreatedBy = user.CreatedBy,
-                    CreatedAt = user.CreatedAt,
-                    RoleId = user.RoleId,
-                    RoleName = (user.Role.Name != null) ? user.Role.Name : null
-                })
+            var user = await _context.Users
+                .Where(u => u.Username == username && u.Role.Name == "Admin")
                 .FirstOrDefaultAsync();
+
+            if (user == null || !_passwordHelper.ValidatePassword(password, user.Password))
+                return null;
+
+            return new UserDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                CreatedBy = user.CreatedBy,
+                CreatedAt = user.CreatedAt,
+                RoleId = user.RoleId,
+                RoleName = user.Role?.Name
+            };
         }
 
         public async Task<IUserDto?> LoginUser(string username, string password)
         {
-            return await _context.Users
-                .Where(user =>
-                    user.Username == username &&
-                    user.Password == password &&
-                    user.Role.Name == "Users"
-                )
-                .Select(user => new UserDto
-                {
-                    Id = user.Id,
-                    Username = user.Username,
-                    CreatedBy = user.CreatedBy,
-                    CreatedAt = user.CreatedAt,
-                    RoleId = user.RoleId,
-                    RoleName = (user.Role.Name != null) ? user.Role.Name : null
-                })
+            var user = await _context.Users
+                .Where(u => u.Username == username && u.Role.Name == "Users")
                 .FirstOrDefaultAsync();
+
+            if (user == null || !_passwordHelper.ValidatePassword(password, user.Password))
+                return null;
+
+            return new UserDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                CreatedBy = user.CreatedBy,
+                CreatedAt = user.CreatedAt,
+                RoleId = user.RoleId,
+                RoleName = user.Role?.Name
+            };
         }
     }
 }

@@ -15,10 +15,12 @@ namespace ParcelPointDB.Data.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly ParcelPointDbContext _context;
+        private readonly PasswordHelper _passwordHelper;
 
-        public UserRepository(ParcelPointDbContext context)
+        public UserRepository(ParcelPointDbContext context, PasswordHelper passwordHelper)
         {
             _context = context;
+            _passwordHelper = passwordHelper;
         }
 
         public async Task<IEnumerable<IUserDto>> GetAllUsersAsync()
@@ -54,10 +56,14 @@ namespace ParcelPointDB.Data.Repositories
 
         public async Task<User> CreateUserAsync(User user)
         {
+            // Encrypt the password before saving
+            user.Password = _passwordHelper.HashPassword(user.Password);
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user;
         }
+
 
         public async Task<bool> UpdateUserAsync(User user)
         {
