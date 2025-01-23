@@ -1,0 +1,6 @@
+@ParcelPointApi_HostAddress = http://localhost:5192
+
+GET {{ParcelPointApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
