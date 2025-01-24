@@ -20,21 +20,20 @@ builder.Services.RegisterServices();
 builder.Services.AddScoped<PasswordHelper>();
 
 // Cors
-builder.Services.AddCors(options =>
+builder.Services.AddCors(o => o.AddPolicy("LowCorsPolicy", builder =>
 {
-    options.AddPolicy("AllowAnyOrigin", builder =>
-    {
-        builder.WithOrigins() 
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
-});
+    builder.AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader();
+}));
 
 var app = builder.Build();
 Console.WriteLine(new PasswordHelper().HashPassword("asdasdasd"));
 
 // Allow Cors
-app.UseCors("AllowAnyOrigin");
+app.UseCors("LowCorsPolicy");
+app.UseRouting();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

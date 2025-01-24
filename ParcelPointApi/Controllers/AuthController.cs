@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ParcelPointApi.Data.Interface.Authentication;
 using ParcelPointDB.Services;
 
 namespace ParcelPointDB.Controllers
@@ -16,10 +17,14 @@ namespace ParcelPointDB.Controllers
 
         // POST: api/Auth/login
         [HttpPost("login")]
-        public async Task<IActionResult> Login(string username, string password, string type)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequest)
         {
             try
             {
+                var username = loginRequest.username;
+                var password = loginRequest.password;
+                var type = loginRequest.type;
+
                 if (type != "admin" && type != "user")
                 {
                     return BadRequest("Invalid type. Must be 'admin' or 'user'.");
@@ -30,7 +35,7 @@ namespace ParcelPointDB.Controllers
                     : await _authService.LoginUser(username, password);
 
                 return user == null
-                    ? NotFound("User not found.")
+                    ? StatusCode(404, "User not found.")
                     : Ok(user);
             }
             catch (Exception ex)
