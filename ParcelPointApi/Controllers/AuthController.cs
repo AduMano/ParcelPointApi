@@ -36,7 +36,7 @@ namespace ParcelPointDB.Controllers
 
                 return user == null
                     ? StatusCode(404, "User not found.")
-                    : Ok(user);
+                    : user.isActive ? Ok(new { userId = user.Id , username = user.Username }) : StatusCode(404, "This account is deactivated.");
             }
             catch (Exception ex)
             {

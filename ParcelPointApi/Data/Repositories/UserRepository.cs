@@ -10,6 +10,11 @@ namespace ParcelPointDB.Data.Repositories
         Task<User> CreateUserAsync(User user);
         Task<bool> UpdateUserAsync(User user);
         Task<bool> DeleteUserAsync(Guid id);
+
+        // Check Existing Username 
+        Task<bool> CheckUsernameAsync(UserUpdateInformationDTO info, string type);
+        // Update Username
+        Task<bool> UpdateUsernameAsync(Guid id, string username);
     }
 
     public class UserRepository : IUserRepository
@@ -102,6 +107,44 @@ namespace ParcelPointDB.Data.Repositories
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<bool> CheckUsernameAsync(UserUpdateInformationDTO info, string type)
+        {
+            try
+            {
+                var user = await _context.Users
+                .Where(u => u.Username == info.Username)
+                .Select(u => new UserInformationDTO { Username = u.Username, Id = u.Id })
+                .FirstOrDefaultAsync();
+
+                if (user == null || (type == "inclusive" && user.Id == info.Id))
+                    return true; // Username is available or inclusive check passes (same user)
+
+                return false; // Username is taken (exclusive check fails)
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateUsernameAsync(Guid id, string username)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user == null) return false;
+
+                user.Username = username;
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
     }
 }

@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ParcelPointApi.Data.Interface.Authentication;
+using ParcelPointApi.Data.Interface.Users;
 using ParcelPointDB.Services;
+using System.Runtime.CompilerServices;
 
 namespace ParcelPointDB.Controllers
 {
@@ -48,18 +51,60 @@ namespace ParcelPointDB.Controllers
             }
         }
 
-        // POST: api/Users
-        [HttpPost]
-        public async Task<IActionResult> PostUser(User user)
+        // GET: /Users/GetInformation/xxxx-xxxx-xxxx-xxxx
+        [HttpGet("GetUserInformation/{id}")]
+        public async Task<IActionResult> GetUserInformation(Guid id)
         {
+            Console.WriteLine(id);
+
             try
             {
-                var result = await _userService.CreateUserAsync(user);
-                return CreatedAtAction("GetUser", new { id = user.Id }, result);
+                var user = await _userService.GetUserInfoByIdAsync(id);
+
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
+                return Ok(user);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error creating user: {ex.Message}");
+                return StatusCode(500, $"Error retrieving information of user: {ex.Message}");
+            }
+        }
+
+        // POST: api/Users
+        //[HttpPost]
+        //public async Task<IActionResult> PostUser(User user)
+        //{
+        //    try
+        //    {
+        //        var result = await _userService.CreateUserAsync(user);
+        //        return CreatedAtAction("GetUser", new { id = user.Id }, result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Error creating user: {ex.Message}");
+        //    }
+        //}
+
+        // PUT: api/User/UpdateInformation
+        [HttpPut("UpdateInformation")]
+        public async Task<IActionResult> Login([FromBody] UserUpdateInformationDTO updateRequest)
+        {
+            try
+            {
+                Console.WriteLine(updateRequest);
+                var result = await _userService.UpdateUserInfoAsync(updateRequest);
+
+                if (result == "success") { return Ok(updateRequest); }
+                else return BadRequest(result);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, $"Error updating user: {ex.Message}");
             }
         }
 

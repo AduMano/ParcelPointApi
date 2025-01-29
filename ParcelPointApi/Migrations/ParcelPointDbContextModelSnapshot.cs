@@ -64,9 +64,9 @@ namespace ParcelPointApi.Migrations
                         .HasColumnName("sub_module");
 
                     b.HasKey("Id")
-                        .HasName("PK__ACTIVITY__3213E83F24BAFDDC");
+                        .HasName("PK__ACTIVITY__3213E83F5766BD23");
 
-                    b.ToTable("ACTIVITY_LOGS");
+                    b.ToTable("ACTIVITY_LOGS", (string)null);
                 });
 
             modelBuilder.Entity("ParcelPointApi.Models.Gender", b =>
@@ -102,12 +102,13 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("name");
+                        .HasColumnName("name")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id")
                         .HasName("PK__GENDER__3213E83FC97D2F73");
 
-                    b.ToTable("GENDER");
+                    b.ToTable("GENDER", (string)null);
                 });
 
             modelBuilder.Entity("ParcelPointApi.Models.IncomingParcel", b =>
@@ -149,7 +150,7 @@ namespace ParcelPointApi.Migrations
                     b.HasKey("Id")
                         .HasName("PK__INCOMING__3213E83FE8056C96");
 
-                    b.ToTable("INCOMING_PARCEL");
+                    b.ToTable("INCOMING_PARCEL", (string)null);
                 });
 
             modelBuilder.Entity("ParcelPointApi.Models.ParcelLog", b =>
@@ -164,7 +165,8 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("action");
+                        .HasColumnName("action")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<DateTime?>("ArrivedAt")
                         .HasColumnType("datetime2")
@@ -180,7 +182,8 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("locker_number");
+                        .HasColumnName("locker_number")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<Guid?>("ParcelId")
                         .HasColumnType("uniqueidentifier")
@@ -190,13 +193,15 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(100)
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)")
-                        .HasColumnName("parcel_name");
+                        .HasColumnName("parcel_name")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<string>("Status")
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("status");
+                        .HasColumnName("status")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier")
@@ -205,7 +210,7 @@ namespace ParcelPointApi.Migrations
                     b.HasKey("Id")
                         .HasName("PK__PARCEL_L__3213E83FE2F71526");
 
-                    b.ToTable("PARCEL_LOGS");
+                    b.ToTable("PARCEL_LOGS", (string)null);
                 });
 
             modelBuilder.Entity("ParcelPointApi.Models.Role", b =>
@@ -241,12 +246,13 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("name");
+                        .HasColumnName("name")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id")
                         .HasName("PK__ROLES__3213E83F0D62D1D5");
 
-                    b.ToTable("ROLES");
+                    b.ToTable("ROLES", (string)null);
                 });
 
             modelBuilder.Entity("ParcelPointApi.Models.User", b =>
@@ -267,6 +273,10 @@ namespace ParcelPointApi.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
                     b.Property<DateTime?>("ModifiedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -282,7 +292,8 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(255)
                         .IsUnicode(false)
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("password");
+                        .HasColumnName("password")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<Guid?>("RoleId")
                         .HasColumnType("uniqueidentifier")
@@ -293,7 +304,8 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("username");
+                        .HasColumnName("username")
+                        .UseCollation("Latin1_General_CS_AS");
 
                     b.HasKey("Id")
                         .HasName("PK__USERS__3213E83FCEE53FC0");
@@ -303,7 +315,7 @@ namespace ParcelPointApi.Migrations
                     b.HasIndex(new[] { "Username" }, "UQ__USERS__F3DBC57296B360BE")
                         .IsUnique();
 
-                    b.ToTable("USERS");
+                    b.ToTable("USERS", (string)null);
                 });
 
             modelBuilder.Entity("ParcelPointApi.Models.UserGroup", b =>
@@ -343,7 +355,7 @@ namespace ParcelPointApi.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("USER_GROUP");
+                    b.ToTable("USER_GROUP", (string)null);
                 });
 
             modelBuilder.Entity("ParcelPointApi.Models.UserGroupMember", b =>
@@ -401,7 +413,7 @@ namespace ParcelPointApi.Migrations
 
                     b.HasIndex("RelationshipId");
 
-                    b.ToTable("USER_GROUP_MEMBERS");
+                    b.ToTable("USER_GROUP_MEMBERS", (string)null);
                 });
 
             modelBuilder.Entity("ParcelPointApi.Models.UserInformation", b =>
@@ -424,7 +436,8 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(20)
                         .IsUnicode(false)
                         .HasColumnType("varchar(20)")
-                        .HasColumnName("contact_number");
+                        .HasColumnName("contact_number")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -440,13 +453,15 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(255)
                         .IsUnicode(false)
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("email");
+                        .HasColumnName("email")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<string>("FirstName")
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("first_name");
+                        .HasColumnName("first_name")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<Guid?>("GenderId")
                         .HasColumnType("uniqueidentifier")
@@ -456,13 +471,15 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("last_name");
+                        .HasColumnName("last_name")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<string>("MiddleName")
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("middle_name");
+                        .HasColumnName("middle_name")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .ValueGeneratedOnAdd()
@@ -478,7 +495,8 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(10)
                         .IsUnicode(false)
                         .HasColumnType("varchar(10)")
-                        .HasColumnName("suffix");
+                        .HasColumnName("suffix")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier")
@@ -491,7 +509,7 @@ namespace ParcelPointApi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("USER_INFORMATION");
+                    b.ToTable("USER_INFORMATION", (string)null);
                 });
 
             modelBuilder.Entity("ParcelPointApi.Models.UserLog", b =>
@@ -506,7 +524,8 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("action");
+                        .HasColumnName("action")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -523,7 +542,7 @@ namespace ParcelPointApi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("USER_LOGS");
+                    b.ToTable("USER_LOGS", (string)null);
                 });
 
             modelBuilder.Entity("ParcelPointApi.Models.UserRelationship", b =>
@@ -559,12 +578,13 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("name");
+                        .HasColumnName("name")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id")
                         .HasName("PK__USER_REL__3213E83F1E571D01");
 
-                    b.ToTable("USER_RELATIONSHIP");
+                    b.ToTable("USER_RELATIONSHIP", (string)null);
                 });
 
             modelBuilder.Entity("ParcelPointApi.Models.UserbioFp", b =>
@@ -593,7 +613,8 @@ namespace ParcelPointApi.Migrations
                         .HasMaxLength(100)
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)")
-                        .HasColumnName("fingerprint_key");
+                        .HasColumnName("fingerprint_key")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .ValueGeneratedOnAdd()
@@ -612,7 +633,7 @@ namespace ParcelPointApi.Migrations
                     b.HasKey("Id")
                         .HasName("PK__USERBIO___3213E83FB0A7F282");
 
-                    b.ToTable("USERBIO_FP");
+                    b.ToTable("USERBIO_FP", (string)null);
                 });
 
             modelBuilder.Entity("ParcelPointApi.Models.User", b =>

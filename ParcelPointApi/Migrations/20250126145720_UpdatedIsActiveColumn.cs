@@ -5,7 +5,7 @@
 namespace ParcelPointApi.Migrations
 {
     /// <inheritdoc />
-    public partial class RemovedActivityLogs : Migration
+    public partial class UpdatedIsActiveColumn : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

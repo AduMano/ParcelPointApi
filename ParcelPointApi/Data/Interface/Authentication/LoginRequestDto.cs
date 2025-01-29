@@ -8,7 +8,7 @@ namespace ParcelPointApi.Data.Interface.Authentication
         string password { get; set; }
         string type { get; set; }
     }
-    public class LoginRequestDto: ILoginRequestDto
+    public class LoginRequestDto : ILoginRequestDto
     {
         [Required]
         public string username { get; set; }

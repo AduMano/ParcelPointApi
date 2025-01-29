@@ -1,6 +1,7 @@
 ﻿using ParcelPointApi.Data.Interface.Users;
 using ParcelPointApi.Models;
 using ParcelPointDB.Data.Repositories;
+using System.Threading.Tasks;
 
 namespace ParcelPointDB.Services
 {
@@ -11,15 +12,23 @@ namespace ParcelPointDB.Services
         Task<string> CreateUserAsync(User user);
         Task<string> UpdateUserAsync(User user);
         Task<string> DeleteUserAsync(Guid id);
+
+        // Get User Info
+        Task<UserInformationDTO> GetUserInfoByIdAsync(Guid id);
+
+        // Update User Info
+        Task<string> UpdateUserInfoAsync(UserUpdateInformationDTO info);
     }
 
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IUserInfoRepository _userInfoRepository;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, IUserInfoRepository userInfoRepository)
         {
             _userRepository = userRepository;
+            _userInfoRepository = userInfoRepository;
         }
 
         public async Task<IEnumerable<IUserDto>> GetAllUsersAsync()
@@ -83,6 +92,35 @@ namespace ParcelPointDB.Services
             {
                 return $"Error deleting user: {ex.Message}";
             }
+        }
+
+        public async Task<UserInformationDTO> GetUserInfoByIdAsync(Guid id)
+        {
+            var user = await _userRepository.GetUserByIdAsync(id);
+            var information = await _userInfoRepository.GetUserInformationByIdAsync(id);
+
+            if (information == null)
+            {
+                return information;
+            }
+
+            information.Username = user.Username;
+
+            return information;
+        }
+
+        public async Task<string> UpdateUserInfoAsync(UserUpdateInformationDTO info)
+        {
+            var checkUsername = await _userRepository.CheckUsernameAsync(info, "inclusive");
+            if (!checkUsername) return "existing username";
+
+            var updateUsername = await _userRepository.UpdateUsernameAsync(info.Id, info.Username);
+            if (!updateUsername) return "update username failed";
+
+            var updateInfo = await _userInfoRepository.UpdateUserInfoAsync(info.Id, info);
+            if (!updateInfo) return "update info failed";
+
+            return "success";
         }
     }
 }

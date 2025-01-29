@@ -36,7 +36,8 @@ namespace ParcelPointDB.Data.Repositories
                 CreatedBy = user.CreatedBy,
                 CreatedAt = user.CreatedAt,
                 RoleId = user.RoleId,
-                RoleName = user.Role?.Name
+                RoleName = user.Role?.Name,
+                isActive = user.IsActive
             };
         }
 
@@ -56,7 +57,8 @@ namespace ParcelPointDB.Data.Repositories
                 CreatedBy = user.CreatedBy,
                 CreatedAt = user.CreatedAt,
                 RoleId = user.RoleId,
-                RoleName = user.Role?.Name
+                RoleName = user.Role?.Name,
+                isActive = user.IsActive
             };
         }
     }

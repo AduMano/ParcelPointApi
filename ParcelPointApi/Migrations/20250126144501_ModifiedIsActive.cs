@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ParcelPointApi.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedCollation : Migration
+    public partial class ModifiedIsActive : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,7 +25,7 @@ namespace ParcelPointApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__ACTIVITY__3213E83F24BAFDDC", x => x.id);
+                    table.PrimaryKey("PK__ACTIVITY__3213E83F5766BD23", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -33,7 +33,7 @@ namespace ParcelPointApi.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
-                    name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false, collation: "Latin1_General_CI_AS"),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     modified_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
@@ -67,10 +67,10 @@ namespace ParcelPointApi.Migrations
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
                     parcel_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    parcel_name = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: true),
-                    locker_number = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true),
-                    status = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true),
-                    action = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true),
+                    parcel_name = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: true, collation: "Latin1_General_CI_AS"),
+                    locker_number = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true, collation: "Latin1_General_CI_AS"),
+                    status = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true, collation: "Latin1_General_CI_AS"),
+                    action = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true, collation: "Latin1_General_CI_AS"),
                     arrived_at = table.Column<DateTime>(type: "datetime2", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
                     user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
@@ -85,7 +85,7 @@ namespace ParcelPointApi.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
-                    name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false, collation: "Latin1_General_CI_AS"),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     modified_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
@@ -101,7 +101,7 @@ namespace ParcelPointApi.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
-                    name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false, collation: "Latin1_General_CI_AS"),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     modified_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
@@ -118,7 +118,7 @@ namespace ParcelPointApi.Migrations
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
                     fingerprint_data = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
-                    fingerprint_key = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: true),
+                    fingerprint_key = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: true, collation: "Latin1_General_CI_AS"),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     modified_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
@@ -135,13 +135,14 @@ namespace ParcelPointApi.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
-                    username = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
-                    password = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
+                    username = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false, collation: "Latin1_General_CS_AS"),
+                    password = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false, collation: "Latin1_General_CI_AS"),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     modified_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
                     modified_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    role_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    role_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    is_active = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -179,14 +180,14 @@ namespace ParcelPointApi.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
-                    first_name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true),
-                    middle_name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true),
-                    last_name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true),
-                    suffix = table.Column<string>(type: "varchar(10)", unicode: false, maxLength: 10, nullable: true),
+                    first_name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true, collation: "Latin1_General_CI_AS"),
+                    middle_name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true, collation: "Latin1_General_CI_AS"),
+                    last_name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true, collation: "Latin1_General_CI_AS"),
+                    suffix = table.Column<string>(type: "varchar(10)", unicode: false, maxLength: 10, nullable: true, collation: "Latin1_General_CI_AS"),
                     birthdate = table.Column<DateOnly>(type: "date", nullable: true),
                     address = table.Column<string>(type: "text", nullable: true),
-                    contact_number = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
-                    email = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: true),
+                    contact_number = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true, collation: "Latin1_General_CI_AS"),
+                    email = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: true, collation: "Latin1_General_CI_AS"),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     modified_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
@@ -214,7 +215,7 @@ namespace ParcelPointApi.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
-                    action = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true),
+                    action = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true, collation: "Latin1_General_CI_AS"),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "(getdate())"),
                     user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },

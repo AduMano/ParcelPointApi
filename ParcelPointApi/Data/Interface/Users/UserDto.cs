@@ -11,6 +11,7 @@ namespace ParcelPointApi.Data.Interface.Users
         Guid? RoleId { get; set; }
         string RoleName { get; set; } // Nullable, as it may not always have a value
         string Password { get; set; }
+        bool isActive { get; set; }
     }
 
     public class UserDto : IUserDto
@@ -22,5 +23,6 @@ namespace ParcelPointApi.Data.Interface.Users
         public Guid? RoleId { get; set; }
         public string RoleName { get; set; }
         public string Password { get; set; }
+        public bool isActive { get; set; }
     }
 }
