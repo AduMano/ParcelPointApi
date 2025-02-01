@@ -90,11 +90,10 @@ namespace ParcelPointDB.Controllers
 
         // PUT: api/User/UpdateInformation
         [HttpPut("UpdateInformation")]
-        public async Task<IActionResult> Login([FromBody] UserUpdateInformationDTO updateRequest)
+        public async Task<IActionResult> UpdateInofmration([FromBody] UserUpdateInformationDTO updateRequest)
         {
             try
             {
-                Console.WriteLine(updateRequest);
                 var result = await _userService.UpdateUserInfoAsync(updateRequest);
 
                 if (result == "success") { return Ok(updateRequest); }
@@ -103,7 +102,6 @@ namespace ParcelPointDB.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
                 return StatusCode(500, $"Error updating user: {ex.Message}");
             }
         }
