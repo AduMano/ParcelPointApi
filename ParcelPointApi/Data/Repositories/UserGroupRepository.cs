@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ParcelPointApi.Data.Interface.UserGroup;
 using ParcelPointApi.Data.Interface.Users;
 using System.Numerics;
 
@@ -11,6 +12,7 @@ namespace ParcelPointApi.Data.Repositories
         Task<UserGroup?> GetUserGroupByUserIdAsync(Guid id);
         Task<IEnumerable<MemberInfoDTO>> GetMemberListByIdAsync(Guid id);
         Task<UserGroup> CreateUserGroupAsync(UserGroup user);
+        Task<bool> UpdateMemberAsync(UpdateMemberDto updateRequest);
     }
 
     public class UserGroupRepository : IUserGroupRepository
@@ -70,6 +72,29 @@ namespace ParcelPointApi.Data.Repositories
             _context.UserGroups.Add(addRequest);
             await _context.SaveChangesAsync();
             return addRequest;
+        }
+
+        public async Task<bool> UpdateMemberAsync(UpdateMemberDto updateRequest)
+        {
+            var member = await _context.UserGroupMembers
+                .Where(x => x.GroupId == updateRequest.GroupId)
+                .SingleOrDefaultAsync();
+
+            if (member == null) return false;
+
+            member.RelationshipId = updateRequest.RelationshipId;
+            member.IsAuthorized = updateRequest.IsAuthorized;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return true;
+            }
+
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
     }
 }

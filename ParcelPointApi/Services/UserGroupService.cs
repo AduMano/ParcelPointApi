@@ -1,4 +1,6 @@
-﻿using ParcelPointApi.Data.Interface.Users;
+﻿using Microsoft.Identity.Client;
+using ParcelPointApi.Data.Interface.UserGroup;
+using ParcelPointApi.Data.Interface.Users;
 using ParcelPointApi.Data.Repositories;
 using ParcelPointDB.Data.Repositories;
 using System.Threading.Tasks.Dataflow;
@@ -11,6 +13,7 @@ namespace ParcelPointDB.Services
         Task<UserGroup?> GetUserGroupByIdAsync(Guid id);
         Task<IEnumerable<MemberInfoDTO>> GetMemberListByIdAsync(Guid id);
         Task<string> CreateUserGroupAsync(UserGroup user);
+        Task<bool> UpdateMemberAsync(UpdateMemberDto updateRequest);
     }
 
     public class UserGroupService : IUserGroupService
@@ -52,6 +55,19 @@ namespace ParcelPointDB.Services
             catch (Exception ex)
             {
                 return $"Error creating group for user: {ex.Message}";
+            }
+        }
+
+        public async Task<bool> UpdateMemberAsync(UpdateMemberDto updateRequest)
+        {
+            try
+            {
+                await _userGroupRepository.UpdateMemberAsync(updateRequest);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
         }
     }

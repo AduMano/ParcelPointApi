@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ParcelPointApi.Data.Interface.Authentication;
+using ParcelPointApi.Data.Interface.UserGroup;
 using ParcelPointApi.Data.Interface.Users;
 using ParcelPointDB.Services;
 using System.Runtime.CompilerServices;
@@ -84,8 +85,19 @@ namespace ParcelPointDB.Controllers
         }
 
 
-        // PUT: UserGroups/UpdateAuthorization
-        [HttpPut("UpdateAuthorization")]
-        public async Task<IActionResult> UpdateAuthorization([FromBody] userUpdate)
+        // PUT: UserGroups/UpdateMember
+        [HttpPut("UpdateMember")]
+        public async Task<IActionResult> UpdateMember([FromBody] UpdateMemberDto updateRequest) 
+        {
+            try
+            {
+                var result = await _userGroupService.UpdateMemberAsync(updateRequest);
+                return Ok(result);
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, $"Error updating Member: {ex.Message}");
+            }
+        }
     }
 }
