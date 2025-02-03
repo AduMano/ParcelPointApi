@@ -3,6 +3,7 @@ using ParcelPointApi.Data.Interface.Authentication;
 using ParcelPointApi.Data.Interface.UserGroup;
 using ParcelPointApi.Data.Interface.Users;
 using ParcelPointDB.Services;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace ParcelPointDB.Controllers
@@ -69,6 +70,23 @@ namespace ParcelPointDB.Controllers
             }
         }
 
+        // GET:
+        [HttpGet("GetUsersList")]
+        public async Task<IActionResult> GetUsersList(Guid loggedInUserId)
+        {
+            try
+            {
+                var users = await _userGroupService.GetUsersListAsync(loggedInUserId);
+
+                if (users == null) return NotFound("No Users Left");
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error on Retrieving Users {ex.Message}");
+            }
+        }
+
         // POST: Group
         [HttpPost]
         public async Task<IActionResult> CreateGroup(UserGroup group)
@@ -84,19 +102,92 @@ namespace ParcelPointDB.Controllers
             }
         }
 
-
-        // PUT: UserGroups/UpdateMember
-        [HttpPut("UpdateMember")]
-        public async Task<IActionResult> UpdateMember([FromBody] UpdateMemberDto updateRequest) 
+        // POST
+        [HttpPost("CreateMember")]
+        public async Task<IActionResult> CreateMember([FromBody] AddMemberDto addMemberRequest)
         {
             try
             {
-                var result = await _userGroupService.UpdateMemberAsync(updateRequest);
+                var result = await _userGroupService.CreateMemberAsync(addMemberRequest);
                 return Ok(result);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error on Adding Member: {ex.Message}");
+            }
+        }
+
+        // PUT
+        [HttpPut("UpdateMember")]
+        public async Task<IActionResult> UpdateMember([FromBody] UpdateMemberCollectionDto updateRequest)
+        {
+            try
+            {
+                if (updateRequest == null || updateRequest.Members == null || !updateRequest.Members.Any())
+                {
+                    return BadRequest("No members provided for update.");
+                }
+
+                var results = new List<bool>();
+                var errors = new List<string>();
+
+                foreach (var member in updateRequest.Members)
+                {
+                    var result = await _userGroupService.UpdateMemberAsync(member);
+                    results.Add(result.Success);
+                    if (!result.Success)
+                    {
+                        errors.Add(result.ErrorMessage);
+                    }
+                }
+
+                if (errors.Any())
+                {
+                    return StatusCode(500, errors);
+                }
+
+                return Ok(new { Success = true });
+            }
+            catch (Exception ex)
             {
                 return StatusCode(500, $"Error updating Member: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("DeleteMember")]
+        public async Task<IActionResult> DeleteMember([FromBody] Guid[] memberInfo)
+        {
+            try
+            {
+                if (memberInfo == null || !memberInfo.Any())
+                {
+                    return BadRequest("No members provided for deletion.");
+                }
+
+                var results = new List<bool>();
+                var errors = new List<string>();
+
+                foreach (var member in memberInfo)
+                {
+                    var result = await _userGroupService.DeleteMemberAsync(member);
+                    results.Add(result.Success);
+                    if (!result.Success)
+                    {
+                        errors.Add(result.ErrorMessage);
+                    }
+                }
+
+                if (errors.Any())
+                {
+                    string error = string.Join(", ", errors);
+                    return StatusCode(500, error);
+                }
+
+                return Ok(new { Success = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error Deleting Member: {ex.Message}");
             }
         }
     }

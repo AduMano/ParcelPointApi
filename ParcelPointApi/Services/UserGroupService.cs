@@ -12,8 +12,11 @@ namespace ParcelPointDB.Services
         Task<IEnumerable<UserGroup>> GetAllUserGroupsAsync();
         Task<UserGroup?> GetUserGroupByIdAsync(Guid id);
         Task<IEnumerable<MemberInfoDTO>> GetMemberListByIdAsync(Guid id);
+        Task<IEnumerable<UserInformationDTO>> GetUsersListAsync(Guid loggedInUserId);
+        Task<MemberInfoDTO> CreateMemberAsync(AddMemberDto addMemberRequest);
         Task<string> CreateUserGroupAsync(UserGroup user);
-        Task<bool> UpdateMemberAsync(UpdateMemberDto updateRequest);
+        Task<MemberResult> UpdateMemberAsync(UpdateMemberDto updateRequest);
+        Task<MemberResult> DeleteMemberAsync(Guid deleteRequest);
     }
 
     public class UserGroupService : IUserGroupService
@@ -45,6 +48,14 @@ namespace ParcelPointDB.Services
             return await _userGroupRepository.GetMemberListByIdAsync(group.Id);
         }
 
+        public async Task<IEnumerable<UserInformationDTO>> GetUsersListAsync(Guid loggedInUserId)
+        {
+            var users = await _userGroupRepository.GetUsersListAsync(loggedInUserId);
+            if (users == null) return Enumerable.Empty<UserInformationDTO>();
+
+            return users;
+        }
+
         public async Task<string> CreateUserGroupAsync(UserGroup user)
         {
             try
@@ -58,16 +69,34 @@ namespace ParcelPointDB.Services
             }
         }
 
-        public async Task<bool> UpdateMemberAsync(UpdateMemberDto updateRequest)
+        public async Task<MemberInfoDTO> CreateMemberAsync(AddMemberDto addMemberRequest)
+        {
+            return await _userGroupRepository.CreateMemberAsync(addMemberRequest);
+        }
+
+        public async Task<MemberResult> UpdateMemberAsync(UpdateMemberDto updateRequest)
         {
             try
             {
-                await _userGroupRepository.UpdateMemberAsync(updateRequest);
-                return true;
+                var result = await _userGroupRepository.UpdateMemberAsync(updateRequest);
+                return new MemberResult { Success = result, ErrorMessage = result ? null : "Failed to update member." };
             }
             catch (Exception ex)
             {
-                return false;
+                return new MemberResult { Success = false, ErrorMessage = ex.Message };
+            }
+        }
+
+        public async Task<MemberResult> DeleteMemberAsync(Guid deleteRequest)
+        {
+            try
+            {
+                var result = await _userGroupRepository.DeleteMemberAsync(deleteRequest);
+                return new MemberResult { Success = result, ErrorMessage = result ? null : "Failed to delete member." };
+            }
+            catch (Exception ex)
+            {
+                return new MemberResult { Success = false, ErrorMessage = ex.Message };
             }
         }
     }

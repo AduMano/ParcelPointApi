@@ -276,9 +276,9 @@ public partial class ParcelPointDbContext : DbContext
                 .HasForeignKey(d => d.MemberId)
                 .HasConstraintName("FK__USER_GROU__membe__6E01572D");
 
-            entity.HasOne(d => d.Relationship).WithMany(p => p.UserGroupMembers)
-                .HasForeignKey(d => d.RelationshipId)
-                .HasConstraintName("FK__USER_GROU__relat__6FE99F9F");
+            //entity.HasOne(d => d.Relationship).WithMany(p => p.UserGroupMembers)
+            //    .HasForeignKey(d => d.RelationshipId)
+            //    .HasConstraintName("FK__USER_GROU__relat__6FE99F9F");
         });
 
         modelBuilder.Entity<UserInformation>(entity =>
