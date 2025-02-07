@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ParcelPointApi.Data.Interface.UserGroup;
 using ParcelPointApi.Data.Interface.Users;
+using ParcelPointApi.Models;
 using System.Numerics;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ParcelPointApi.Data.Repositories
 {
@@ -15,7 +17,7 @@ namespace ParcelPointApi.Data.Repositories
         Task<MemberInfoDTO> CreateMemberAsync(AddMemberDto addMemberRequest);
         Task<UserGroup> CreateUserGroupAsync(UserGroup user);
         Task<bool> UpdateMemberAsync(UpdateMemberDto updateRequest);
-        Task<bool> DeleteMemberAsync(Guid deleteRequest);
+        Task<bool> DeleteMemberAsync(Guid deleteRequest, Guid groupOwner);
     }
 
     public class UserGroupRepository : IUserGroupRepository
@@ -141,8 +143,6 @@ namespace ParcelPointApi.Data.Repositories
                 CreatedBy = addMemberRequest.CreatedBy
             };
 
-            Console.WriteLine(newMember);
-
             await _context.UserGroupMembers.AddAsync(newMember);
             await _context.SaveChangesAsync();
 
@@ -169,12 +169,27 @@ namespace ParcelPointApi.Data.Repositories
                 })
                 .FirstOrDefaultAsync();
 
+            // Insert Logs
+            var owner = await _context.Users.Where(u => u.Id == addMemberRequest.CreatedBy).Select(u => new User { Username = u.Username, Id = u.Id }).FirstOrDefaultAsync();
+            var member = await _context.Users.Where(u => u.Id == addMemberRequest.MemberId).Select(u => u.Username).FirstOrDefaultAsync();
+            var log = new ActivityLog
+            {
+                ActionTitle = "Adding Member",
+                ActionContext = $"User {owner.Username} Just added {member} as a member",
+                CreatedAt = DateTime.Now,
+                CreatedBy = owner.Id,
+                Module = "Utilities",
+                SubModule = "User Logs"
+            };
+
+            await _context.ActivityLogs.AddAsync(log);
+            await _context.SaveChangesAsync();
+
             return memberInfo;
         }
 
         public async Task<bool> UpdateMemberAsync(UpdateMemberDto updateRequest)
         {
-            var test = updateRequest;
             var member = await _context.UserGroupMembers
                 .Where(x => x.MemberId == updateRequest.GroupMemberId)
                 .SingleOrDefaultAsync();
@@ -187,7 +202,24 @@ namespace ParcelPointApi.Data.Repositories
 
             try
             {
+                // Insert Logs
+                var lowner = await _context.Users.Where(u => u.Id == updateRequest.GroupOwnerId).Select(u => new User { Username = u.Username, Id = u.Id }).FirstOrDefaultAsync();
+                var lmember = await _context.Users.Where(u => u.Id == updateRequest.GroupMemberId).Select(u => u.Username).FirstOrDefaultAsync();
+                var lrelationship = await _context.UserRelationships.Where(r => r.Id == updateRequest.RelationshipId).Select(r => new UserRelationship { Name = r.Name }).FirstOrDefaultAsync();
+                var log = new ActivityLog
+                {
+                    ActionTitle = "Update Member",
+                    ActionContext = $"Updated Member {lmember}'s Relationship to {lrelationship.Name} and Authorization to {updateRequest.IsAuthorized}",
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = lowner.Id,
+                    Module = "Utilities",
+                    SubModule = "User Logs"
+                };
+
+
+                await _context.ActivityLogs.AddAsync(log);
                 await _context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception ex)
@@ -197,7 +229,7 @@ namespace ParcelPointApi.Data.Repositories
             }
         }
 
-        public async Task<bool> DeleteMemberAsync(Guid deleteRequest)
+        public async Task<bool> DeleteMemberAsync(Guid deleteRequest, Guid groupOwner)
         {
             var member = await _context.UserGroupMembers
                 .Where(member => member.MemberId == deleteRequest)
@@ -210,6 +242,21 @@ namespace ParcelPointApi.Data.Repositories
             try
             {
                 _context.UserGroupMembers.Remove(member);
+                // Insert Logs
+                var lowner = await _context.Users.Where(u => u.Id == groupOwner).Select(u => new User { Username = u.Username, Id = u.Id }).FirstOrDefaultAsync();
+                var lmember = await _context.Users.Where(u => u.Id == deleteRequest).Select(u => u.Username).FirstOrDefaultAsync();
+                var log = new ActivityLog
+                {
+                    ActionTitle = "Delete Member",
+                    ActionContext = $"User {lowner.Username} Removed {lmember} from their group.",
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = lowner.Id,
+                    Module = "Utilities",
+                    SubModule = "User Logs"
+                };
+
+
+                await _context.ActivityLogs.AddAsync(log);
                 await _context.SaveChangesAsync();
 
                 return true;

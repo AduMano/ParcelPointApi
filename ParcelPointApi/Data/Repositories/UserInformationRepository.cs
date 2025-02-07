@@ -62,6 +62,20 @@ namespace ParcelPointDB.Data.Repositories
                 user.Birthdate = userInformation.BirthDate;
                 user.Address = userInformation.Address;
 
+                // Insert Logs
+                var luser = await _context.Users.Where(u => u.Id == userInformation.Id).Select(u => new User { Username = u.Username, Id = u.Id }).FirstOrDefaultAsync();
+                var log = new ActivityLog
+                {
+                    ActionTitle = "Update Information",
+                    ActionContext = $"User {luser.Username} Updated their own information",
+                    CreatedBy = luser.Id,
+                    Module = "Utilities",
+                    SubModule = "User Logs",
+                };
+
+
+                await _context.ActivityLogs.AddAsync(log);
+
                 await _context.SaveChangesAsync();
                 return true;
             }

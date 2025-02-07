@@ -17,5 +17,5 @@ public partial class UserRelationship
 
     public Guid? ModifiedBy { get; set; }
 
-    // public virtual ICollection<UserGroupMember> UserGroupMembers { get; set; } = new List<UserGroupMember>();
+    public virtual ICollection<UserGroupMember> UserGroupMembers { get; set; } = new List<UserGroupMember>();
 }

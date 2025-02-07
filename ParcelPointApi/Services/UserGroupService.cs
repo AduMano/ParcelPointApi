@@ -16,7 +16,7 @@ namespace ParcelPointDB.Services
         Task<MemberInfoDTO> CreateMemberAsync(AddMemberDto addMemberRequest);
         Task<string> CreateUserGroupAsync(UserGroup user);
         Task<MemberResult> UpdateMemberAsync(UpdateMemberDto updateRequest);
-        Task<MemberResult> DeleteMemberAsync(Guid deleteRequest);
+        Task<MemberResult> DeleteMemberAsync(Guid deleteRequest, Guid groupOwner);
     }
 
     public class UserGroupService : IUserGroupService
@@ -87,11 +87,11 @@ namespace ParcelPointDB.Services
             }
         }
 
-        public async Task<MemberResult> DeleteMemberAsync(Guid deleteRequest)
+        public async Task<MemberResult> DeleteMemberAsync(Guid deleteRequest, Guid groupOwner)
         {
             try
             {
-                var result = await _userGroupRepository.DeleteMemberAsync(deleteRequest);
+                var result = await _userGroupRepository.DeleteMemberAsync(deleteRequest, groupOwner);
                 return new MemberResult { Success = result, ErrorMessage = result ? null : "Failed to delete member." };
             }
             catch (Exception ex)

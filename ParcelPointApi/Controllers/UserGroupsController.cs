@@ -155,8 +155,11 @@ namespace ParcelPointDB.Controllers
         }
 
         [HttpDelete("DeleteMember")]
-        public async Task<IActionResult> DeleteMember([FromBody] Guid[] memberInfo)
+        public async Task<IActionResult> DeleteMember([FromBody] DeleteMemberRequestDto deleteReq)
         {
+            var memberInfo = deleteReq.Members;
+            var userID = deleteReq.GroupOwnerId;
+
             try
             {
                 if (memberInfo == null || !memberInfo.Any())
@@ -169,7 +172,7 @@ namespace ParcelPointDB.Controllers
 
                 foreach (var member in memberInfo)
                 {
-                    var result = await _userGroupService.DeleteMemberAsync(member);
+                    var result = await _userGroupService.DeleteMemberAsync(member, userID);
                     results.Add(result.Success);
                     if (!result.Success)
                     {

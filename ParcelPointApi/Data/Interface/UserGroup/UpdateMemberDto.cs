@@ -5,6 +5,7 @@
         Guid GroupMemberId { get; set; }
         bool IsAuthorized { get; set; }
         Guid RelationshipId { get; set; }
+        Guid? GroupOwnerId { get; set;}
     }
 
     public class UpdateMemberDto : IUpdateMember
@@ -12,6 +13,7 @@
         public Guid GroupMemberId { get; set; }
         public bool IsAuthorized { get; set; }
         public Guid RelationshipId { get; set; }
+        public Guid? GroupOwnerId { get; set; }
     }
 
     public class UpdateMemberCollectionDto

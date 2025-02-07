@@ -26,5 +26,6 @@ public partial class UserGroupMember
     public virtual UserGroup? Group { get; set; }
 
     public virtual User? Member { get; set; }
+
     public virtual UserRelationship? Relationship { get; set; }
 }

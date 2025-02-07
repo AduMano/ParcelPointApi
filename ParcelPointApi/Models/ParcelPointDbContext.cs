@@ -17,6 +17,8 @@ public partial class ParcelPointDbContext : DbContext
 
     public virtual DbSet<ActivityLog> ActivityLogs { get; set; }
 
+    public virtual DbSet<EmailVerification> EmailVerifications { get; set; }
+
     public virtual DbSet<Gender> Genders { get; set; }
 
     public virtual DbSet<IncomingParcel> IncomingParcels { get; set; }
@@ -41,7 +43,7 @@ public partial class ParcelPointDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=DESKTOP-0GLFD43;Database=ParcelPointDb;Encrypt=True;TrustServerCertificate=True;Integrated Security=True;");
+        => optionsBuilder.UseSqlServer("Server=DESKTOP-0GLFD43;Database=ParcelPointDb;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -73,6 +75,31 @@ public partial class ParcelPointDbContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("sub_module");
+        });
+
+        modelBuilder.Entity<EmailVerification>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__EmailVer__3213E83FC3D080EE");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Email)
+                .HasMaxLength(255)
+                .HasColumnName("email");
+            entity.Property(e => e.ExpiresAt)
+                .HasColumnType("datetime")
+                .HasColumnName("expires_at");
+            entity.Property(e => e.IsUsed)
+                .HasDefaultValue(false)
+                .HasColumnName("is_used");
+            entity.Property(e => e.VerificationCode)
+                .HasMaxLength(6)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasColumnName("verification_code");
         });
 
         modelBuilder.Entity<Gender>(entity =>
@@ -116,7 +143,6 @@ public partial class ParcelPointDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnName("modified_at");
             entity.Property(e => e.ModifiedBy).HasColumnName("modified_by");
-            entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
         });
 
@@ -212,7 +238,7 @@ public partial class ParcelPointDbContext : DbContext
             entity.Property(e => e.Username)
                 .HasMaxLength(50)
                 .IsUnicode(false)
-                .UseCollation("Latin1_General_CS_AS")
+                .UseCollation("SQL_Latin1_General_CP1_CS_AS")
                 .HasColumnName("username");
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
@@ -276,9 +302,9 @@ public partial class ParcelPointDbContext : DbContext
                 .HasForeignKey(d => d.MemberId)
                 .HasConstraintName("FK__USER_GROU__membe__6E01572D");
 
-            //entity.HasOne(d => d.Relationship).WithMany(p => p.UserGroupMembers)
-            //    .HasForeignKey(d => d.RelationshipId)
-            //    .HasConstraintName("FK__USER_GROU__relat__6FE99F9F");
+            entity.HasOne(d => d.Relationship).WithMany(p => p.UserGroupMembers)
+                .HasForeignKey(d => d.RelationshipId)
+                .HasConstraintName("FK__USER_GROU__relat__6FE99F9F");
         });
 
         modelBuilder.Entity<UserInformation>(entity =>
