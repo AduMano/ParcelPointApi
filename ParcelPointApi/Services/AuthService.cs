@@ -9,7 +9,7 @@ namespace ParcelPointDB.Services
         Task<IUserDto?> LoginAdmin(string username, string password);
         Task<IUserDto?> LoginUser(string username, string password);
         Task LogoutUser(Guid userID);
-        Task<bool> VerifyEmailAsync(string email);
+        Task<bool> VerifyEmailAsync(string email, string except, string type);
         Task<string> SendVerificationCodeAsync(string email);
         Task<bool> VerifyCodeAsync(string email, string code);
         Task<bool> UpdatePasswordAsync(string email, string password);  
@@ -38,9 +38,9 @@ namespace ParcelPointDB.Services
             await _authRepository.LogoutUser(userId);
         }
 
-        public async Task<bool> VerifyEmailAsync(string email)
+        public async Task<bool> VerifyEmailAsync(string email, string except, string type)
         {
-            return await _authRepository.VerifyEmailAsync(email);
+            return await _authRepository.VerifyEmailAsync(email, except, type);
         }
 
         public async Task<string> SendVerificationCodeAsync(string email)

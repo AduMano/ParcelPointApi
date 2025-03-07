@@ -14,7 +14,7 @@ namespace ParcelPointDB.Data.Repositories
         Task<IUserDto?> LoginAdmin(string username, string password);
         Task<IUserDto?> LoginUser(string username, string password);
         Task LogoutUser(Guid userID);
-        Task<bool> VerifyEmailAsync(string email);
+        Task<bool> VerifyEmailAsync(string email, string except, string type);
         Task<string> GenerateVerificationCodeByEmail(string email);
         Task SendVerificationCodeEmail(string email, string code);
         Task<bool> VerifyCodeAsync(string email, string code);
@@ -44,15 +44,16 @@ namespace ParcelPointDB.Data.Repositories
             // Insert User Logs
             var log = new ActivityLog
             {
-                ActionTitle = "User Logged In",
+                ActionTitle = "Admin Logged In",
                 ActionContext = $"Admin {user.Username} Just Logged In",
                 CreatedAt = DateTime.Now,
                 CreatedBy = user.Id,
-                Module = "",
-                SubModule = ""
+                Module = "Utilities",
+                SubModule = "User Logs"
             };
 
             await _context.ActivityLogs.AddAsync(log);
+            await _context.SaveChangesAsync();
 
             return new UserDto
             {
@@ -105,11 +106,19 @@ namespace ParcelPointDB.Data.Repositories
         public async Task LogoutUser(Guid userID)
         {
             // Insert User Logs
-            var user = await _context.Users.Where(u => u.Id == userID).Select(u => new User { Username = u.Username }).FirstOrDefaultAsync();
+            var user = await _context.Users
+            .Where(u => u.Id == userID)
+            .Select(u => new
+            {
+                Username = u.Username,
+                RoleName = u.Role != null ? u.Role.Name : "No Role"
+            })
+            .FirstOrDefaultAsync();
+
             var log = new ActivityLog
             {
-                ActionTitle = "User Logged Out",
-                ActionContext = $"User {user.Username} Just Logged Out",
+                ActionTitle = $"{user.RoleName} Logged Out",
+                ActionContext = $"{user.RoleName} {user.Username} Just Logged Out",
                 CreatedAt = DateTime.Now,
                 CreatedBy = userID,
                 Module = "Utilities",
@@ -120,50 +129,90 @@ namespace ParcelPointDB.Data.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> VerifyEmailAsync(string email)
+        public async Task<bool> VerifyEmailAsync(string email, string except, string type)
         {
-            var user = await _context.UserInformations.Where(u => u.Email == email).FirstOrDefaultAsync();
+            if (type == "user")
+            {
+                var user = await _context.UserInformations
+                .Where(u =>
+                    u.Email == email &&
+                    u.User.Role.Name == "Users" &&
+                    u.Email != except
+                )
+                .FirstOrDefaultAsync();
 
-            return (user != null) ? true : false;
+                return (user != null) ? true : false;
+            }
+            else if (type == "admin")
+            {
+                var user = await _context.UserInformations
+                .Where(u =>
+                    u.Email == email &&
+                    u.User.Role.Name == "Admin" &&
+                    u.Email != except
+                )
+                .FirstOrDefaultAsync();
+
+                return (user != null) ? true : false;
+            }
+            else
+            {
+                return false;
+            }
+
         }
 
         public async Task<string> GenerateVerificationCodeByEmail(string email)
         {
-            // Loop generate until number that is not yet used is available
-            var code = "";
-            while (true)
+            var existingCode = await _context.EmailVerifications
+                .Where(e => e.Email == email && e.IsUsed == false && e.ExpiresAt > DateTime.Now)
+                .OrderByDescending(e => e.CreatedAt) // Get the latest record first
+                .FirstOrDefaultAsync();
+
+            if (existingCode != null)
+            {
+                // If there's an active code, just update the expiration time
+                existingCode.ExpiresAt = DateTime.Now.AddMinutes(10);
+                await _context.SaveChangesAsync();
+                return existingCode.VerificationCode;
+            }
+
+            // No active code found, generate a new unique verification code
+            string code;
+            EmailVerification existingUsedCode;
+
+            do
             {
                 code = Generate6Digits.GenerateVerificationCode();
-                var locate = await _context.EmailVerifications
-                    .Where(e => e.VerificationCode == code && e.IsUsed == false)
-                    .FirstOrDefaultAsync(); 
-                
-                if (locate != null)
-                {
-                    locate.Email = email;
-                    locate.CreatedAt = DateTime.Now;
-                    locate.ExpiresAt = DateTime.Now.AddMinutes(10);
 
-                    await _context.SaveChangesAsync();
+                // Check if the generated code exists and is already used
+                existingUsedCode = await _context.EmailVerifications
+                    .Where(e => e.VerificationCode == code && e.IsUsed == true)
+                    .FirstOrDefaultAsync();
 
-                    break;
-                }
-                else
-                {
-                    var newCode = new EmailVerification
-                    {
-                        Email = email,
-                        CreatedAt = DateTime.Now,
-                        ExpiresAt = DateTime.Now.AddMinutes(10),
-                        IsUsed = false,
-                        VerificationCode = code
-                    };
+            } while (existingUsedCode == null && await _context.EmailVerifications.AnyAsync(e => e.VerificationCode == code && e.IsUsed == false));
 
-                    await _context.EmailVerifications.AddAsync(newCode);
-                    await _context.SaveChangesAsync();
-                    break;
-                }
+            if (existingUsedCode != null)
+            {
+                // If the generated code exists but was used, reset it
+                existingUsedCode.IsUsed = false;
+                existingUsedCode.ExpiresAt = DateTime.Now.AddMinutes(10);
+                await _context.SaveChangesAsync();
+                return existingUsedCode.VerificationCode;
             }
+
+            // If a completely new code was generated, create a new record
+            var newCode = new EmailVerification
+            {
+                Email = email,
+                CreatedAt = DateTime.Now,
+                ExpiresAt = DateTime.Now.AddMinutes(10),
+                IsUsed = false,
+                VerificationCode = code
+            };
+
+            await _context.EmailVerifications.AddAsync(newCode);
+            await _context.SaveChangesAsync();
 
             return code;
         }
@@ -181,13 +230,24 @@ namespace ParcelPointDB.Data.Repositories
 
         public async Task<bool> VerifyCodeAsync(string email, string code)
         {
-            // Select the verification code and update to used
+            // Fetch the verification code for the given email
             var verificationCode = await _context.EmailVerifications
                 .Where(e => e.Email == email && e.VerificationCode == code)
                 .FirstOrDefaultAsync();
 
+            // If the code doesn't exist, return false
             if (verificationCode == null) return false;
 
+            // Ensure `IsUsed` is treated as `false` when `null`
+            bool isUsed = verificationCode.IsUsed ?? false;
+
+            // If the code is expired or already used, return false
+            if (verificationCode.ExpiresAt <= DateTime.Now || isUsed)
+            {
+                return false;
+            }
+
+            // Mark the code as used and save changes
             verificationCode.IsUsed = true;
             await _context.SaveChangesAsync();
 
@@ -215,7 +275,7 @@ namespace ParcelPointDB.Data.Repositories
             var log = new ActivityLog
             {
                 ActionTitle = "User Password Update",
-                ActionContext = $"User {userAccount.Username} Updated their password",
+                ActionContext = $"{userAccount.Username} Updated their password",
                 CreatedAt = DateTime.Now,
                 CreatedBy = userID,
                 Module = "Utilities",

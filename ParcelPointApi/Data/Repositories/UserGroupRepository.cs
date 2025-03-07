@@ -47,9 +47,9 @@ namespace ParcelPointApi.Data.Repositories
         public async Task<IEnumerable<UserInformationDTO>> GetUsersListAsync(Guid loggedInUserId)
         {
             // Get the GroupId for the currently logged-in user (excluding the current user)
-            var currentUserGroupId = await _context.UserGroupMembers
-                .Where(ugm => ugm.MemberId == loggedInUserId)
-                .Select(ugm => ugm.GroupId)
+            var currentUserGroupId = await _context.UserGroups
+                .Where(ugm => ugm.OwnerId == loggedInUserId)
+                .Select(ugm => ugm.Id)
                 .FirstOrDefaultAsync();
 
             if (currentUserGroupId == Guid.Empty)
@@ -60,7 +60,7 @@ namespace ParcelPointApi.Data.Repositories
             // Get users who are not part of the same group as the logged-in user
             var usersNotInGroup = await _context.UserInformations
                 .Where(u => u.UserId != loggedInUserId) // Exclude the logged-in user
-                .Where(u => u.User.Role.Name == "users") // Ensure the user has the "users" role
+                .Where(u => u.User.Role.Name == "Users") // Ensure the user has the "users" role
                 .Where(u => !_context.UserGroupMembers
                     .Where(ugm => ugm.GroupId == currentUserGroupId)
                     .Select(ugm => ugm.MemberId)
@@ -231,6 +231,8 @@ namespace ParcelPointApi.Data.Repositories
 
         public async Task<bool> DeleteMemberAsync(Guid deleteRequest, Guid groupOwner)
         {
+            Console.WriteLine("Test");
+
             var member = await _context.UserGroupMembers
                 .Where(member => member.MemberId == deleteRequest)
                 .SingleOrDefaultAsync();
@@ -242,6 +244,7 @@ namespace ParcelPointApi.Data.Repositories
             try
             {
                 _context.UserGroupMembers.Remove(member);
+
                 // Insert Logs
                 var lowner = await _context.Users.Where(u => u.Id == groupOwner).Select(u => new User { Username = u.Username, Id = u.Id }).FirstOrDefaultAsync();
                 var lmember = await _context.Users.Where(u => u.Id == deleteRequest).Select(u => u.Username).FirstOrDefaultAsync();

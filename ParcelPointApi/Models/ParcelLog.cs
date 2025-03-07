@@ -19,6 +19,10 @@ public partial class ParcelLog
 
     public DateTime? ArrivedAt { get; set; }
 
+    public DateTime? RetrievedAt { get; set; }
+
+    public string? RetrievedBy { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public Guid? UserId { get; set; }

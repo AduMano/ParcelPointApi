@@ -17,12 +17,12 @@ namespace ParcelPointDB.Controllers
         }
 
         // GET
-        [HttpGet("VerifyEmail/{email}")]
-        public async Task<IActionResult> VerifyEmail(string email)
+        [HttpGet("VerifyEmail/{email}/{except?}/{type?}/")]
+        public async Task<IActionResult> VerifyEmail(string email, string except = " ", string type = "user")
         {
             try
             {
-                var isExisting = await _authService.VerifyEmailAsync(email);
+                var isExisting = await _authService.VerifyEmailAsync(email, except, type);
                 return Ok(isExisting);
             }
             catch (Exception ex)

@@ -23,6 +23,8 @@ public partial class User
 
     public bool IsActive { get; set; }
 
+    public virtual ICollection<NotificationLog> NotificationLogs { get; set; } = new List<NotificationLog>();
+
     public virtual Role? Role { get; set; }
 
     public virtual ICollection<UserGroupMember> UserGroupMembers { get; set; } = new List<UserGroupMember>();

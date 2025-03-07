@@ -9,15 +9,24 @@ namespace ParcelPointDB.Services
     {
         Task<IEnumerable<IUserDto>> GetAllUsersAsync();
         Task<IUserDto?> GetUserByIdAsync(Guid id);
+        Task<IEnumerable<UserDetailsDto>> GetAllUsersWithDetailsAsync(String type);
+        Task<Guid> AddNewUserAsync(RegisterUserDto request);
+        Task<bool> UsernameCheckAsync(String username, String except);
         Task<string> CreateUserAsync(User user);
-        Task<string> UpdateUserAsync(User user);
+        Task UpdateUserAsync(RegisterUserDto request);
         Task<string> DeleteUserAsync(Guid id);
 
         // Get User Info
         Task<UserInformationDTO> GetUserInfoByIdAsync(Guid id);
 
+        // Read Notification
+        Task<bool> ReadNotificationByIdAsync(Guid[] id);
+
         // Update User Info
         Task<string> UpdateUserInfoAsync(UserUpdateInformationDTO info);
+
+        // Get User Notifications
+        Task<IEnumerable<NotificationLog>> GetUserNotificationsByIdAsync(Guid id);
     }
 
     public class UserService : IUserService
@@ -41,6 +50,23 @@ namespace ParcelPointDB.Services
             return await _userRepository.GetUserByIdAsync(id);
         }
 
+        public async Task<bool> UsernameCheckAsync(String username, String except)
+        {
+            return await _userRepository.UsernameCheckAsync(username, except);
+        }
+
+        public async Task<IEnumerable<UserDetailsDto>> GetAllUsersWithDetailsAsync(String type)
+        {
+            return await _userInfoRepository.GetAllUsersWithDetailsAsync(type);
+        }
+
+        public async Task<Guid> AddNewUserAsync(RegisterUserDto request)
+        {
+            // Potentially do validations, password hashing, etc.
+            // Then delegate to repository:
+            return await _userRepository.AddNewUserAsync(request);
+        }
+
         public async Task<string> CreateUserAsync(User user)
         {
             try
@@ -54,24 +80,11 @@ namespace ParcelPointDB.Services
             }
         }
 
-        public async Task<string> UpdateUserAsync(User user)
+        public async Task UpdateUserAsync(RegisterUserDto request)
         {
-            try
-            {
-                var isUpdated = await _userRepository.UpdateUserAsync(user);
-                if (isUpdated)
-                {
-                    return "User updated successfully.";
-                }
-                else
-                {
-                    return "Failed to update user.";
-                }
-            }
-            catch (Exception ex)
-            {
-                return $"Error updating user: {ex.Message}";
-            }
+
+            Console.WriteLine("Went to Service");
+            await _userRepository.UpdateUserAsync(request);
         }
 
         public async Task<string> DeleteUserAsync(Guid id)
@@ -109,6 +122,16 @@ namespace ParcelPointDB.Services
             return information;
         }
 
+        public async Task<bool> ReadNotificationByIdAsync(Guid[] id)
+        {
+            for (var i = 0; i < id.Length; i++)
+            {
+                await _userRepository.ReadNotificationByIdAsync(id[i]);
+            }
+
+            return true;
+        }
+
         public async Task<string> UpdateUserInfoAsync(UserUpdateInformationDTO info)
         {
             var checkUsername = await _userRepository.CheckUsernameAsync(info, "inclusive");
@@ -121,6 +144,11 @@ namespace ParcelPointDB.Services
             if (!updateInfo) return "update info failed";
 
             return "success";
+        }
+
+        public async Task<IEnumerable<NotificationLog>> GetUserNotificationsByIdAsync(Guid id)
+        {
+            return await _userRepository.GetUserNotificationsByIdAsync(id);
         }
     }
 }

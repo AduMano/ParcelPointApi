@@ -7,6 +7,7 @@ namespace ParcelPointDB.Data.Repositories
     {
         // Get UserInformation
         Task<UserInformationDTO?> GetUserInformationByIdAsync(Guid id);
+        Task<IEnumerable<UserDetailsDto>> GetAllUsersWithDetailsAsync(String type);
 
         // Update UserInformation
         Task<bool> UpdateUserInfoAsync(Guid id, UserUpdateInformationDTO userInformation);
@@ -45,6 +46,55 @@ namespace ParcelPointDB.Data.Repositories
             {
                 return null;
             }
+        }
+
+        public async Task<IEnumerable<UserDetailsDto>> GetAllUsersWithDetailsAsync(String type)
+        {
+            // 
+            // We'll:
+            // 1) Include Role
+            // 2) Include UserInformations -> ThenInclude Gender
+            // 3) Flatten the data into UserDetailsDto
+            //    (If a user can have multiple UserInformations, we'll pick the first. 
+            //     Adjust as needed if you want all of them.)
+            //
+            var users = await _context.Users
+                .Include(u => u.Role)
+                .Include(u => u.UserInformations)
+                    .ThenInclude(ui => ui.Gender)
+                .Where(u => u.Role.Name == type)
+                .Select(u => new UserDetailsDto
+                {
+                    UserId = u.Id,
+                    Username = u.Username,
+                    IsActive = u.IsActive,
+                    RoleName = u.Role.Name,
+                    RoleID = u.Role.Id,
+
+                    // For user info, assume there's either exactly one or we take the first
+                    FirstName = u.UserInformations.Select(ui => ui.FirstName).FirstOrDefault(),
+                    MiddleName = u.UserInformations.Select(ui => ui.MiddleName).FirstOrDefault(),
+                    LastName = u.UserInformations.Select(ui => ui.LastName).FirstOrDefault(),
+                    Suffix = u.UserInformations.Select(ui => ui.Suffix).FirstOrDefault(),
+                    Birthdate = u.UserInformations.Select(ui => ui.Birthdate.HasValue
+                        ? ui.Birthdate.Value.ToDateTime(new System.TimeOnly(0, 0))
+                        : (System.DateTime?)null).FirstOrDefault(),
+
+                    // Gender name from nested Gender
+                    Gender = u.UserInformations
+                        .Select(ui => ui.Gender != null ? ui.Gender.Name : null)
+                        .FirstOrDefault(),
+
+                    GenderID = u.UserInformations.Select(ui => ui.Gender.Id).FirstOrDefault(),
+
+                    Address = u.UserInformations.Select(ui => ui.Address).FirstOrDefault(),
+                    ContactNumber = u.UserInformations.Select(ui => ui.ContactNumber).FirstOrDefault(),
+                    Email = u.UserInformations.Select(ui => ui.Email).FirstOrDefault(),
+                    PhotoUrl = "" // or read from userInformation if you store photo there
+                })
+                .ToListAsync();
+
+            return users;
         }
 
         public async Task<bool> UpdateUserInfoAsync(Guid id, UserUpdateInformationDTO userInformation)

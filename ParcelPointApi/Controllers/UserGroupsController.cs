@@ -71,12 +71,12 @@ namespace ParcelPointDB.Controllers
         }
 
         // GET:
-        [HttpGet("GetUsersList")]
-        public async Task<IActionResult> GetUsersList(Guid loggedInUserId)
+        [HttpGet("GetUsersList/{id}")]
+        public async Task<IActionResult> GetUsersList(Guid id)
         {
             try
             {
-                var users = await _userGroupService.GetUsersListAsync(loggedInUserId);
+                var users = await _userGroupService.GetUsersListAsync(id);
 
                 if (users == null) return NotFound("No Users Left");
                 return Ok(users);
@@ -159,6 +159,8 @@ namespace ParcelPointDB.Controllers
         {
             var memberInfo = deleteReq.Members;
             var userID = deleteReq.GroupOwnerId;
+
+            Console.WriteLine("Test");
 
             try
             {

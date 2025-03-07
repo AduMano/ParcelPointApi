@@ -23,9 +23,15 @@ public partial class ParcelPointDbContext : DbContext
 
     public virtual DbSet<IncomingParcel> IncomingParcels { get; set; }
 
+    public virtual DbSet<NotificationLog> NotificationLogs { get; set; }
+
     public virtual DbSet<ParcelLog> ParcelLogs { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
+
+    public virtual DbSet<SystemMode> SystemModes { get; set; }
+
+    public virtual DbSet<TableStatus> TableStatuses { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -40,6 +46,8 @@ public partial class ParcelPointDbContext : DbContext
     public virtual DbSet<UserRelationship> UserRelationships { get; set; }
 
     public virtual DbSet<UserbioFp> UserbioFps { get; set; }
+
+    public virtual DbSet<UserbioTemp> UserbioTemps { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -146,6 +154,41 @@ public partial class ParcelPointDbContext : DbContext
             entity.Property(e => e.UserId).HasColumnName("user_id");
         });
 
+        modelBuilder.Entity<NotificationLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__NOTIFICA__3213E83F0A42A0B2");
+
+            entity.ToTable("NOTIFICATION_LOGS");
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("(newid())")
+                .HasColumnName("id");
+            entity.Property(e => e.Context)
+                .HasColumnType("text")
+                .HasColumnName("context");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.IsRead)
+                .HasDefaultValue(false)
+                .HasColumnName("is_read");
+            entity.Property(e => e.LockerNumber).HasColumnName("locker_number");
+            entity.Property(e => e.RetrievedBy)
+                .HasMaxLength(80)
+                .IsUnicode(false)
+                .HasColumnName("retrieved_by");
+            entity.Property(e => e.Title)
+                .HasMaxLength(255)
+                .HasColumnName("title");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.User).WithMany(p => p.NotificationLogs)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__NOTIFICAT__user___3F115E1A");
+        });
+
         modelBuilder.Entity<ParcelLog>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__PARCEL_L__3213E83FE2F71526");
@@ -175,6 +218,11 @@ public partial class ParcelPointDbContext : DbContext
                 .IsUnicode(false)
                 .UseCollation("Latin1_General_CI_AS")
                 .HasColumnName("parcel_name");
+            entity.Property(e => e.RetrievedAt).HasColumnName("retrieved_at");
+            entity.Property(e => e.RetrievedBy)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("retrieved_by");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -205,6 +253,37 @@ public partial class ParcelPointDbContext : DbContext
                 .IsUnicode(false)
                 .UseCollation("Latin1_General_CI_AS")
                 .HasColumnName("name");
+        });
+
+        modelBuilder.Entity<SystemMode>(entity =>
+        {
+            entity.ToTable("system_mode");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.BiometricId).HasColumnName("biometric_id");
+            entity.Property(e => e.CurrentState)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("current_state");
+            entity.Property(e => e.LastUpdate)
+                .HasColumnType("datetime")
+                .HasColumnName("last_update");
+        });
+
+        modelBuilder.Entity<TableStatus>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("Table_Status");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.IsOpen).HasColumnName("is_open");
+            entity.Property(e => e.LockerNumber).HasColumnName("locker_number");
+            entity.Property(e => e.LockerSize)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("locker_size");
+            entity.Property(e => e.OwnerId).HasColumnName("owner_id");
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -354,6 +433,10 @@ public partial class ParcelPointDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnName("modified_at");
             entity.Property(e => e.ModifiedBy).HasColumnName("modified_by");
+            entity.Property(e => e.PhotoUrl)
+                .HasMaxLength(550)
+                .IsUnicode(false)
+                .HasColumnName("photo_url");
             entity.Property(e => e.Suffix)
                 .HasMaxLength(10)
                 .IsUnicode(false)
@@ -442,6 +525,21 @@ public partial class ParcelPointDbContext : DbContext
                 .HasColumnName("modified_at");
             entity.Property(e => e.ModifiedBy).HasColumnName("modified_by");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+        });
+
+        modelBuilder.Entity<UserbioTemp>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("USERBIO_TEMP");
+
+            entity.Property(e => e.BioId).HasColumnName("bio_id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.OwnerId).HasColumnName("owner_id");
         });
 
         OnModelCreatingPartial(modelBuilder);
