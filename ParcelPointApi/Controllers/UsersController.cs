@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ParcelPointApi.Data.Interface.Authentication;
 using ParcelPointApi.Data.Interface.Users;
+using ParcelPointApi.Models;
 using ParcelPointDB.Services;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
 
 namespace ParcelPointDB.Controllers
@@ -11,10 +14,12 @@ namespace ParcelPointDB.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly ParcelPointDbContext _context;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, ParcelPointDbContext context)
         {
             _userService = userService;
+            _context = context;
         }
 
         // GET
@@ -115,6 +120,59 @@ namespace ParcelPointDB.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Error on retrieving user notifications: {ex.Message}");
+            }
+        }
+
+        public class ToggleStatusDTO
+        {
+            public string OperatorID { get; set; }
+            public string Username { get; set; }
+        }
+
+        [HttpPut("ToggleStatus")]
+        public async Task<IActionResult> ToggleStatus([FromBody] ToggleStatusDTO payload)
+        {
+            try
+            {
+                var username = payload.Username;
+                var operatorID = payload.OperatorID;
+
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+                if (user == null)
+                {
+                    return NotFound($"User '{username}' not found.");
+                }
+
+                // Toggle the status
+                bool newStatus = !user.IsActive;
+
+                // Execute SQL update query with parameters
+                await _context.Database.ExecuteSqlRawAsync(
+                    "UPDATE USERS SET is_active = {0} WHERE username = {1}", newStatus, username);
+
+                // Logs
+                var operatorUser = await _context.Users
+                    .Where(u => u.Id == Guid.Parse(operatorID))
+                    .FirstOrDefaultAsync();
+
+                var log = new ActivityLog
+                {
+                    ActionTitle = "User Activity Toggle",
+                    ActionContext = $"{operatorUser.Username} Updated {user.Username}'s Status",
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = operatorUser.Id,
+                    Module = "Utilities",
+                    SubModule = "User Logs"
+                };
+
+                await _context.ActivityLogs.AddAsync(log);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, newStatus });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, error = $"Error updating status: {ex.Message}" });
             }
         }
 

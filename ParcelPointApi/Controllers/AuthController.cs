@@ -79,6 +79,11 @@ namespace ParcelPointDB.Controllers
         {
             try
             {
+                if (string.IsNullOrEmpty(email))
+                    return BadRequest("Email cannot be null or empty.");
+
+                Console.WriteLine($"Received email: {email}"); // Debugging
+
                 var code = await _authService.SendVerificationCodeAsync(email);
                 return Ok(code);
             }

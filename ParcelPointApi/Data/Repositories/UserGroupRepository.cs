@@ -106,7 +106,7 @@ namespace ParcelPointApi.Data.Repositories
                     Username = ugm.Member.Username, // Map Username
                     Relationship = ugm.Relationship, // Assuming you have the relationship object available
                     IsAuthorized = ugm.IsAuthorized, // Map IsAuthorized
-                    GroupMemberId = ugm.MemberId
+                    GroupMemberId = ugm.Id
                 })
                 .ToListAsync();
 
@@ -165,7 +165,7 @@ namespace ParcelPointApi.Data.Repositories
                     Username = ugm.Member.Username,
                     Relationship = ugm.Relationship, // Assuming you have the relationship object available
                     IsAuthorized = ugm.IsAuthorized, // Map IsAuthorized
-                    GroupMemberId = ugm.MemberId
+                    GroupMemberId = ugm.Id
                 })
                 .FirstOrDefaultAsync();
 
@@ -191,7 +191,7 @@ namespace ParcelPointApi.Data.Repositories
         public async Task<bool> UpdateMemberAsync(UpdateMemberDto updateRequest)
         {
             var member = await _context.UserGroupMembers
-                .Where(x => x.MemberId == updateRequest.GroupMemberId)
+                .Where(x => x.Id == updateRequest.GroupMemberId)
                 .SingleOrDefaultAsync();
 
 
@@ -232,9 +232,10 @@ namespace ParcelPointApi.Data.Repositories
         public async Task<bool> DeleteMemberAsync(Guid deleteRequest, Guid groupOwner)
         {
             Console.WriteLine("Test");
+            Console.WriteLine(deleteRequest);
 
             var member = await _context.UserGroupMembers
-                .Where(member => member.MemberId == deleteRequest)
+                .Where(member => member.Id == deleteRequest)
                 .SingleOrDefaultAsync();
 
             Console.WriteLine(member);

@@ -19,12 +19,12 @@ namespace ParcelPointDB.Controllers
         }
 
         // GET
-        [HttpGet("GetActiveParcels/{bioID}")]
-        public async Task<IActionResult> GetActiveParcels(int bioID)
+        [HttpGet("GetActiveParcels/{bioID}/{mode}")]
+        public async Task<IActionResult> GetActiveParcels(int bioID, int mode)
         {
             try
             {
-                var lockerNumbers = await _parcelLogsService.GetActiveParcelsAsync(bioID);
+                var lockerNumbers = await _parcelLogsService.GetActiveParcelsAsync(bioID, mode);
 
                 if (lockerNumbers.Count == 0)
                 {
@@ -96,7 +96,8 @@ namespace ParcelPointDB.Controllers
                 var newParcel = await _parcelLogsService.CreateParcelLogsAsync(user_number, size);
 
                 if (newParcel == "No User Found.") return NotFound(newParcel);
-                else if (newParcel == "Failed Creating Log") return StatusCode(500, newParcel);
+                else if (newParcel == "Failed Creating Logs") return StatusCode(500, newParcel);
+                else if (newParcel == "Locker not available.e") return StatusCode(500, newParcel);
                 return Ok(newParcel);
             }
             catch (Exception ex)

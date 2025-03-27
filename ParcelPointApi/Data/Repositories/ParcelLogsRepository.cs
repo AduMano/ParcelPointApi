@@ -8,6 +8,11 @@ namespace ParcelPointApi.Data.Repositories
         public ParcelLog Parcel { get; set; }
         public NotificationLog Notification { get; set; }
     }
+    public class CombinedListTableDTO
+    {
+        public List<ParcelLog>? Parcel { get; set; }
+        public List<NotificationLog>? Notification { get; set; }
+    }
 
     public interface IParcelLogsRepository
     {
@@ -29,7 +34,7 @@ namespace ParcelPointApi.Data.Repositories
         {
             var logs = await _context.ParcelLogs
                 .Where(p => p.UserId == id)
-                .OrderBy(p => p.ArrivedAt)
+                .OrderByDescending(p => p.ArrivedAt)
                 .ToListAsync();
 
             return logs;
@@ -130,8 +135,8 @@ namespace ParcelPointApi.Data.Repositories
                 ParcelId = newID,
                 ParcelName = "Parcel",
                 Action = null,
-                ArrivedAt = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow,
+                ArrivedAt = DateTime.Now,
+                CreatedAt = DateTime.Now,
                 LockerNumber = locker + "",
                 Status = "Not Picked Up",
                 UserId = id,
@@ -146,7 +151,7 @@ namespace ParcelPointApi.Data.Repositories
                 Id = Guid.NewGuid(),
                 Title = "Delivered Parcel",
                 Context = "Your parcel has been delivered and stored in Locker #" + locker,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 LockerNumber = locker,
                 IsRead = false,
                 RetrievedBy = null,

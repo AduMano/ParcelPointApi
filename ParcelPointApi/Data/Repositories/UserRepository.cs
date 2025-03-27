@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ParcelPointApi.Data.Interface.Users;
 using Sprache;
+using System.ComponentModel;
 
 namespace ParcelPointDB.Data.Repositories
 {
@@ -13,6 +14,9 @@ namespace ParcelPointDB.Data.Repositories
         Task<User> CreateUserAsync(User user);
         Task UpdateUserAsync(RegisterUserDto request);
         Task<bool> DeleteUserAsync(Guid id);
+
+        // Check Locker Availability
+        Task<bool> CheckLockerAvailability(Guid userID, int size);
 
         // Check Existing Username 
         Task<bool> CheckUsernameAsync(UserUpdateInformationDTO info, string type);
@@ -40,6 +44,26 @@ namespace ParcelPointDB.Data.Repositories
             _context = context;
             _passwordHelper = passwordHelper;
         }
+
+        public async Task<bool> CheckLockerAvailability(Guid userID, int size)
+        {
+            var locker = await _context.TableStatuses
+                .Where(locker => locker.LockerNumber == size)
+                .SingleOrDefaultAsync();
+
+            if (locker == null) return false;
+
+            Console.WriteLine(locker.OwnerId.ToString());
+
+            if (locker.OwnerId == null)
+            {
+                await _context.Database.ExecuteSqlRawAsync("UPDATE Table_Status SET owner_id = {0}, is_open = {1} WHERE locker_number = {2}", userID, true, size);
+
+                return true;
+            }
+
+            else return false;
+        } 
 
         public async Task<IEnumerable<IUserDto>> GetAllUsersAsync()
         {

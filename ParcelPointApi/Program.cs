@@ -35,6 +35,14 @@ builder.Services.AddControllers()
         opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Avoid infinite loop references
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
+
 // Automatically register all services
 builder.Services.RegisterServices();
 builder.Services.AddScoped<PasswordHelper>();
@@ -47,7 +55,10 @@ builder.Services.AddCors(o => o.AddPolicy("LowCorsPolicy", builder =>
            .AllowAnyHeader();
 }));
 
-
+builder.Services.AddSignalR()
+    .AddJsonProtocol(opts => {
+        opts.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 // Register Normal Web Sockets
 // Dictionaries to keep track of connected clients.
@@ -62,35 +73,6 @@ builder.WebHost.ConfigureKestrel(options =>
 
 var app = builder.Build();
 Console.WriteLine(new PasswordHelper().HashPassword("asdasdasd"));
-
-// ✅ Enable WebSockets
-app.UseWebSockets();
-
-// ✅ WebSocket Endpoint (Handles WebSocket Connections)
-app.Map("/ws", async context =>
-{
-    if (!context.WebSockets.IsWebSocketRequest)
-    {
-        context.Response.StatusCode = 400;
-        await context.Response.WriteAsync("WebSocket connections only.");
-        return;
-    }
-
-    WebSocket ws = await context.WebSockets.AcceptWebSocketAsync();
-    Console.WriteLine("WebSocket connection established!");
-
-    var buffer = new byte[1024 * 4];
-    while (ws.State == WebSocketState.Open)
-    {
-        var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-        string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-        Console.WriteLine($"Received: {message}");
-    }
-
-    await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
-    Console.WriteLine("WebSocket connection closed.");
-});
-
 
 // Allow Cors
 app.UseCors("LowCorsPolicy");
